@@ -3,6 +3,7 @@ from in_game_process import Cell
 import settings
 import utility
 
+# main file
 if __name__ == '__main__':
     root = Tk()
     root.configure(bg='black')
