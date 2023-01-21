@@ -41,9 +41,12 @@ if __name__ == '__main__':
     # dynamic button creator
     for x in range(settings.GRID_SIZE):
         for y in range(settings.GRID_SIZE):
-            new_cell = Cell()
+            new_cell = Cell(x, y)
             new_cell.button_creator(center_frame)
             new_cell.cell_object.grid(column=x, row=y)
+
+    Cell.random_mines()
+
 
     # active window
     root.mainloop()
