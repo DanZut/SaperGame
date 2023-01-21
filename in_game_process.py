@@ -19,7 +19,6 @@ class Cell:
             location,
             width=12,
             height=4,
-            text=f'{self.x},{self.y}'
         )
         btn.bind('<Button-1>', self.button_action_left)
         btn.bind('<Button-3>', self.button_action_right)
@@ -76,7 +75,7 @@ class Cell:
         return counter
 
     def show_cell(self):
-        print(self.near_mine_length())
+        self.cell_object.configure(text=self.near_mine_length)
 
     def show_mine(self):
         print(self.cell_object.configure(bg='red'))
