@@ -1,92 +1,118 @@
-from tkinter import Button
+from tkinter import Button, Label, messagebox
 import random
 import settings
 
 
-class Cell:
-    all = []
 
-    def __init__(self, x, y, mine=False):
-        self.mine = mine
-        self.cell_object = None
+class CellClass:
+    all = []
+    cell_count = settings.CELL_COUNT
+    cell_count_label_object = None
+
+    def __init__(self, x, y, is_mine=False):
+        self.is_mine = is_mine
+        self.is_open = False
+        self.is_candidate = False
+        self.cell_button_object = None
         self.x = x
         self.y = y
+        CellClass.all.append(self)  # add all object to list named by all
 
-        Cell.all.append(self)
-
-    def button_creator(self, location):
-        btn = Button(
+    def create_button_object(self, location):
+        new_button = Button(
             location,
             width=12,
-            height=4,
+            height=4
         )
-        btn.bind('<Button-1>', self.button_action_left)
-        btn.bind('<Button-3>', self.button_action_right)
-        self.cell_object = btn
+        new_button.bind('<Button-1>', self.left_click)
+        new_button.bind('<Button-3>', self.right_click)
+        self.cell_button_object = new_button
 
-    def button_action_left(self, event):
-        if self.mine:
+    @staticmethod
+    def create_cell_count_label(location):
+        new_label = Label(
+            location,
+            bg='black',
+            fg='white',
+            text=f'Cells left: {CellClass.cell_count}',
+            width=12,
+            height=4,
+            font=('', 30)
+        )
+        CellClass.cell_count_label_object = new_label
+
+    def left_click(self, event):
+        if self.is_mine:
             self.show_mine()
         else:
+            if self.surrounded_cells_mine_length == 0:
+                for c in self.surrounded_cells:
+                    c.show_cell()
             self.show_cell()
-            pass
 
-    def button_action_right(self, event):
-        print(event)
-        print('it works')
-
-    def get_cell_by_x(self, x, y):
-        for cell in Cell.all:
+    def get_cells(self, x, y):
+        # return a cell object based on the value of x and y
+        for cell in CellClass.all:
             if cell.x == x and cell.y == y:
                 return cell
 
     @property
-    def near_cell(self):
-        """
-        1,1:
-            0,0 - V
-            0,1 - V
-            0,2 - V
-            1,0 - V
-            2,0 - V
-            2,1 - V
-            2,2 - V
-            1,2 - V
-        """
+    def surrounded_cells(self):
         cells = [
-            self.get_cell_by_x(self.x - 1, self.y - 1),
-            self.get_cell_by_x(self.x - 1, self.y),
-            self.get_cell_by_x(self.x - 1, self.y + 1),
-            self.get_cell_by_x(self.x, self.y - 1),
-            self.get_cell_by_x(self.x + 1, self.y - 1),
-            self.get_cell_by_x(self.x + 1, self.y),
-            self.get_cell_by_x(self.x + 1, self.y + 1),
-            self.get_cell_by_x(self.x, self.y + 1)
+            self.get_cells(self.x - 1, self.y - 1),
+            self.get_cells(self.x - 1, self.y),
+            self.get_cells(self.x - 1, self.y + 1),
+            self.get_cells(self.x, self.y - 1),
+            self.get_cells(self.x + 1, self.y - 1),
+            self.get_cells(self.x + 1, self.y),
+            self.get_cells(self.x + 1, self.y + 1),
+            self.get_cells(self.x, self.y + 1)
         ]
         cells = [cell for cell in cells if cell is not None]
         return cells
 
-    def near_mine_length(self):
+    @property
+    def surrounded_cells_mine_length(self):
         counter = 0
-        for cell in self.near_cell:
-            if cell.mine:
+        for cell in self.surrounded_cells:
+            if cell.is_mine:
                 counter += 1
-
         return counter
 
     def show_cell(self):
-        self.cell_object.configure(text=self.near_mine_length)
+        if not self.is_open:
+            CellClass.cell_count -= 1
+            self.cell_button_object.configure(text=f'{self.surrounded_cells_mine_length}')
+            # Replace the text of cell count label with the newer count
+            if CellClass.cell_count_label_object:
+                CellClass.cell_count_label_object.configure(text=f'Cells left: {CellClass.cell_count}')
+
+        # mark the cell as open
+        self.is_open = True
 
     def show_mine(self):
-        print(self.cell_object.configure(bg='red'))
+        self.cell_button_object.configure(text='MINE', fg='red')
+        # improve the ending go to https://docs.python.org/3.10/library/tkinter.messagebox.html
+        msng = messagebox.askquestion('GAME OVER', 'Another Round?')
+        print(msng)
+        if msng == True:
+            #find a way to restart program
+        else:
+            quit()
+
+    def right_click(self, event):
+        if not self.is_candidate:
+            self.cell_button_object.configure(bg='blue')
+            self.is_candidate = True
+        else:
+            self.cell_button_object.configure(bg='gray85')
+            self.is_candidate = False
 
     @staticmethod
-    def random_mines():
-        choosen_cells = random.sample(
-            Cell.all, settings.MINES_COUNT
-        )
-        for choosen_cell in choosen_cells:
-            choosen_cell.mine = True
+    def randomize_mines():
+        choosen_cells = random.sample(CellClass.all, settings.MINES_COUNT)
+        for cell in choosen_cells:
+            cell.is_mine = True
 
     def __repr__(self):
-        return f'Cell {self.x}, {self.y}'
+        return f'Cell ({self.x},{self.y}) '
