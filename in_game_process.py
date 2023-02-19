@@ -1,7 +1,7 @@
+import sys
 from tkinter import Button, Label, messagebox
 import random
 import settings
-
 
 
 class CellClass:
@@ -49,6 +49,12 @@ class CellClass:
                 for c in self.surrounded_cells:
                     c.show_cell()
             self.show_cell()
+            # if mines count is equal to the cells left count, player won
+            if CellClass.cell_count == settings.MINES_COUNT:
+                show_info = messagebox.showinfo('Well done!', 'You won the game')
+        # Cancel left and right click events if cell is alread open
+        self.cell_button_object.unbind('<Button-1>')
+        self.cell_button_object.unbind('<Button-3>')
 
     def get_cells(self, x, y):
         # return a cell object based on the value of x and y
@@ -86,23 +92,19 @@ class CellClass:
             # Replace the text of cell count label with the newer count
             if CellClass.cell_count_label_object:
                 CellClass.cell_count_label_object.configure(text=f'Cells left: {CellClass.cell_count}')
-
+            # in case if was marked before as mine candiate
+            self.cell_button_object.configure(bg='gray85')
         # mark the cell as open
         self.is_open = True
 
     def show_mine(self):
         self.cell_button_object.configure(text='MINE', fg='red')
-        # improve the ending go to https://docs.python.org/3.10/library/tkinter.messagebox.html
-        msng = messagebox.askquestion('GAME OVER', 'Another Round?')
-        print(msng)
-        if msng == True:
-            #find a way to restart program
-        else:
-            quit()
+        show_info = messagebox.showinfo('GAME OVER', 'You clicked on the mine')
+        sys.exit()
 
     def right_click(self, event):
         if not self.is_candidate:
-            self.cell_button_object.configure(bg='blue')
+            self.cell_button_object.configure(bg='black')
             self.is_candidate = True
         else:
             self.cell_button_object.configure(bg='gray85')

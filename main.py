@@ -20,6 +20,18 @@ if __name__ == '__main__':
         )
     top_frame.place(x=0, y=0)
 
+    timer = Label(
+        top_frame,
+        bg='black',
+        fg='white',
+        text='soon available',  # add in the future
+        font=('', 25)
+    )
+    timer.place(
+        x=utility.width_prct(25),
+        y=0
+    )
+
     left_frame = Frame(
         root,
         bg='black',
